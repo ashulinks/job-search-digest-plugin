@@ -73,6 +73,37 @@ See `skills/job-search-digest/references/job-boards.md` for the full mechanics.
 
 ## Changelog
 
+- **1.9.0** — Fixed two bugs found in real use. (1) Tailored CVs weren't reaching Drive when
+  cv-jd-tailor was used directly/standalone (outside the job-search-digest pipeline) — only the
+  pipeline itself had a save-to-Drive instruction, so a directly-tailored CV was only ever
+  available as an in-chat download. cv-jd-tailor now owns saving its own output (new Step 8),
+  every time, using the same `Job Search/<Country>/Tailored CVs/` convention and one-shot base64
+  upload discipline, whether invoked directly or via the pipeline; it explains plainly and skips
+  the save if Drive isn't connected, rather than failing silently. (2) A delivered CV lost all
+  table shading and most run-level text colors versus the source template — traced to
+  `references/templates.md` instructing python-docx's `Document(path)` + `.save()` for row-height,
+  keep-with-next, and photo-insertion edits, which round-trips the whole file through python-docx's
+  object model and doesn't reliably preserve every element of a hand-authored template. Every edit
+  in that file (including those three) is now a direct `word/document.xml` XML edit instead, inside
+  the same single-script workflow already used for text edits — and Step 6's visual QA gained a
+  mandatory shading/color element-count check against the starting document, so a regression like
+  this is caught before delivery, not after.
+- **1.8.0** — Extended the Base CV cache (1.5.0) to cover a user-supplied template as well
+  as the default one. Previously a persisted `Job Search/User Template.docx` bypassed the
+  cache entirely — every tailoring re-did the full reconciliation pass from scratch, the
+  same cost the cache was built to avoid. `Base CV.meta.md` now fingerprints both the
+  source template and the profile, so it correctly rebuilds when either the profile
+  changes, the user switches template preference, or they replace their supplied file —
+  and reuses the cached base otherwise, regardless of which template is configured.
+- **1.7.0** — job-search-digest now asks once, in its own Step 1, whether tailored CVs
+  should use the default template or a template the user supplies — closing a gap where
+  a recurring digest run always silently used the default with no way to actually record
+  or honor a user's own template. The choice is stored in `config.md` (`Template:
+  default | user-supplied`); a supplied file is saved to Drive as `Job Search/User
+  Template.docx` and reused on every future run without re-asking. cv-jd-tailor's own
+  Step 1 template question now only fires when it's used directly, outside the digest
+  pipeline. Also fixed a stale reference to "three template files" left over from the
+  1.4.0 consolidation to one template.
 - **1.6.0** — Removed Indeed as a board. No MCP-backed job-search connector is used by
   default now; every country falls back to web search + fetch and/or Employer Career
   Pages. Australia in particular now has no default board at all — Employer Career Pages
