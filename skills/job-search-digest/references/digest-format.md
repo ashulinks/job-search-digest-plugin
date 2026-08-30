@@ -11,6 +11,7 @@ Job Search/
   config.md               — global config (keywords, countries, boards by country, delivery, cadence)
   cv-profile.md           — the parsed master CV profile, built once and reused every run
   seen-jobs.md            — global dedup log across all selected countries
+  run-lock.md             — present only while a run is in progress; see "Run lock" below
   Digests/
     YYYY-MM-DD-digest.md  — one combined digest per run, sectioned by country
   <Country>/
@@ -29,15 +30,70 @@ One file, not one per country:
 - Keywords: <comma-separated phrases>
 - Countries: <selected countries>
 - Boards by country:
-  - Australia: <selected boards, if Australia is selected>
-  - UAE: <selected boards, if UAE is selected>
-  - Singapore: <selected boards, if Singapore is selected>
+  - Australia: <selected boards, if Australia is selected — never LinkedIn or SEEK, see job-boards.md>
+  - UAE: <selected boards, if UAE is selected — never LinkedIn>
+  - Singapore: <selected boards, if Singapore is selected — never LinkedIn>
 - Delivery: <email | push | artifact>
-- Cadence: <daily | weekly>
+- Cadence: <daily | weekly | hourly | any other cron-expressible interval>
 - Last updated: <date>
+
+## Employer Career Pages roster (optional, per country)
+
+Only present for a country using the Employer Career Pages method (`job-boards.md`) — every
+country using SEEK or LinkedIn's former slot needs one; any other country may add one too.
+
+### Roster — <Country>
+**Usual suspects (permanent):** <comma-separated companies>
+
+**Discovered (auto-added):**
+- <Company> — added <date> — snippet: "<title/snippet that justified the add>"
+
+**Per-run cap:** <number, default 12–15 if unset>
 ```
 
+**Cadence is free text, not a closed set.** Daily and weekly are the common defaults to offer in
+Step 1, but anything a Cowork Scheduled Task can express (including hourly) is valid — write down
+whatever the user actually asks for rather than coercing it to the nearest of the two defaults.
+
+**Company-name normalization (roster dedup).** Before comparing a candidate name against the
+existing roster, lowercase it and strip trailing legal-entity suffixes (Ltd, Limited, Group, Bank,
+Inc, LLC, PLC, Pte, Co, Corporation, and similar) and punctuation. "Macquarie," "Macquarie Group,"
+and "Macquarie Bank Limited" must normalize to the same key and therefore never produce three
+roster entries for one employer. When genuinely unsure whether two names refer to the same
+company, don't add the ambiguous one — surface it in that run's digest Notes for the user to
+resolve manually instead of guessing.
+
+**Pruning discovered companies.** Never delete a discovered entry outright — the point is to never
+lose a lead. Instead, once a discovered company has gone 20 consecutive runs (not calendar days —
+runs, so this scales correctly whether cadence is hourly or weekly) without producing a posting
+that survived dedup, stop including it in the active per-run search rotation and mark it `dormant`
+in its roster line. A dormant entry is skipped when filling per-run slots but still counts toward
+"never forget a lead," and reactivates automatically (drop the `dormant` mark) the moment it's
+mentioned again in a fresh search snippet. This is what keeps the active search list from growing
+without bound while the historical roster itself can keep growing freely.
+
 Both this file and `cv-profile.md` below are also read directly by the `job-search-scheduler` skill when it sets up the recurring task — it never re-asks for any of this, it just requires both files to already exist. Keep the field set here as the single source of truth; don't let any other skill restate or duplicate it.
+
+## Run lock (overlap guard)
+
+Before Step 1 of any run (scheduled or interactive), check Drive for `Job Search/run-lock.md`:
+
+- **Doesn't exist, or exists but its `Started` timestamp is more than 2 hours old** (a lock that
+  old means a previous run almost certainly crashed rather than being genuinely still active):
+  write/overwrite it with `# Job Search Digest — Run Lock\n- Started: <current ISO timestamp>`,
+  then proceed normally.
+- **Exists and is 2 hours old or less**: a previous run is genuinely still in progress. Stop before
+  doing any search or write work. On a scheduled run, end quietly — no digest, no notification,
+  nothing appended to seen-jobs.md; this is expected behavior at short cadences, not a failure. On
+  an interactive run, tell the user plainly that a previous run appears to still be in progress
+  (with its start time) and ask whether to wait or proceed anyway; proceeding anyway overwrites the
+  lock with a fresh timestamp exactly as above.
+
+**Always delete `run-lock.md`** as the very last action of a run — after Step 8, and also on any
+handled failure path (Step 8's "never fail silently" still applies; clearing the lock is separate
+from whether the run succeeded). A run that crashes before reaching its own cleanup simply leaves
+the lock to expire on its own via the 2-hour staleness check above, rather than blocking every
+future run permanently.
 
 ## cv-profile.md
 
@@ -96,6 +152,7 @@ One combined digest per run, covering every country searched that run — never 
 
 ## Notes
 - Boards unreachable this run: <list, or "none">
+- Employer Career Pages roster additions this run: <company, country, snippet that justified it — or "none">
 - Assumptions made this run: <list, or "none">
 ```
 

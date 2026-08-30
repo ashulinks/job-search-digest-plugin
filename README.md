@@ -58,6 +58,47 @@ instructions, creates the scheduled task with a one-line prompt (`Run the
 job-search-digest skill.` — everything else comes from Drive), and records
 that setup is done so it won't ever create a duplicate.
 
+## Board coverage
+
+LinkedIn (all countries) and SEEK (Australia) are excluded from fetching entirely —
+both prohibit automated access in their terms and block it in practice, so
+job-search-digest never fetches either, and never routes around the block with
+browser automation. In their place, **Employer Career Pages** searches a per-country
+roster of target companies' own career sites/ATS directly (Macquarie's own portal and
+icare NSW's site, for example, work cleanly where LinkedIn does not). The roster starts
+from a "usual suspects" seed (never removed) and grows automatically as new companies
+surface in search results at a senior, keyword-matching level — every addition is
+logged in the digest so the growth stays visible even without a manual approval step.
+See `skills/job-search-digest/references/job-boards.md` for the full mechanics.
+
+## Changelog
+
+- **1.4.0** — Consolidated to a single CV template. `Singapore_CV.docx` and `UAE_CV.docx`
+  are removed; the former `Australia_CV.docx` is renamed `CV_Template.docx` and used as
+  the one starting document for all three countries (country-specific deltas — work-rights
+  wording, regulatory framework ordering, the optional UAE photo — are now applied at edit
+  time per `country-rules.md`, not by picking a different file). Its content is now fully
+  generic: every employer, program name, metric, certification, and framework name is a
+  bracketed, intelligently-labeled placeholder (`[Employer A]`, `[Framework 1]`, `[N]+
+  staff`) rather than one person's real career facts — cv-jd-tailor fills every placeholder
+  with the candidate's own real content each run, same as it always has.
+- **1.3.0** — The template's header identity fields (name, tagline, phone, email,
+  LinkedIn, citizenship status) replaced with bracketed placeholders, so the shipped
+  template carries no individual's personal information. No behavior change: the skill
+  already always pulls the real header/contact details from the user's own supplied CV,
+  never from the template file's text.
+- **1.2.0** — Performance/reliability review: Employer Career Pages batches each
+  employer's keywords into one query instead of one-per-keyword (falls back to
+  per-keyword only if the batched query underperforms); added a run-lock so an hourly
+  or otherwise fast cadence can't start a new run while a previous one is still going;
+  defined a company-name normalization rule and a dormant/rotation policy so the
+  roster's active search list can't grow without bound; cadence is now documented as
+  free text (daily/weekly are just the two defaults offered) instead of implying it's
+  limited to those two.
+- **1.1.0** — Removed LinkedIn/SEEK fetching (ToS/robots.txt block); added Employer
+  Career Pages as the replacement method, with an auto-growing, always-logged roster.
+- **1.0.0** — Initial packaging.
+
 ## A note on how this plugin was packaged
 
 `plugin.json` follows the documented Claude Code plugin manifest schema and

@@ -29,7 +29,7 @@ Reuse an existing structured master profile for this user in this conversation/s
 
 Read `references/country-rules.md` for the target country: work-rights disclosure requirements, format/length conventions, and what's legal vs. prohibited to include. **2-page cap regardless of country.** Place the work-rights/citizenship disclosure where the user's template specifies, or in the header/contact block per the country's convention.
 
-Select the matching asset file per `references/templates.md` — `Australia_CV.docx` / `Singapore_CV.docx` / `UAE_CV.docx` — unless Step 1 already established a user-supplied template. This is the literal starting document for docx output, always: never regenerate from scratch (e.g. with docx-js) when a matching asset exists — edit a copy of it in place per that file's instructions.
+Use `assets/templates/CV_Template.docx` — the single standard template shared by all three countries, per `references/templates.md` — unless Step 1 already established a user-supplied template. This is the literal starting document for docx output, always: never regenerate from scratch (e.g. with docx-js) when the asset exists — edit a copy of it in place per that file's instructions, replacing every bracketed placeholder with the candidate's real content.
 
 ## Step 4 — Localize regulatory and standards references
 
@@ -65,6 +65,6 @@ Say so explicitly, at every step, whenever something can't be done as requested 
 ## Reference files
 
 - `references/country-rules.md` — per-country work-rights disclosure, format/length, and legal/prohibited content rules
-- `references/templates.md` — the three default templates, their shared structure, tone/voice, domain-relabeling rules, and the asset-file editing workflow
+- `references/templates.md` — the single standard template shared by all three countries, its structure, tone/voice, domain-filling rules, and the asset-file editing workflow
 - `references/regulatory-equivalents.md` — regulatory/standards mapping across AU, UAE, and Singapore for genuine transferable-experience framing
 - `references/rubric.md` — the two-axis scoring rubric and the Step 5 score gate
