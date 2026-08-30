@@ -73,6 +73,24 @@ See `skills/job-search-digest/references/job-boards.md` for the full mechanics.
 
 ## Changelog
 
+- **1.6.0** — Removed Indeed as a board. No MCP-backed job-search connector is used by
+  default now; every country falls back to web search + fetch and/or Employer Career
+  Pages. Australia in particular now has no default board at all — Employer Career Pages
+  is its sole coverage unless the user adds one — since Indeed was its only non-excluded
+  option alongside the already-excluded SEEK and LinkedIn.
+- **1.5.0** — Cost optimization pass, based on real per-session token-cost data. Added a
+  per-country **Base CV cache** (`<Country>/Base CV.docx` in Drive): the expensive part of
+  tailoring — filling every placeholder in `CV_Template.docx` with the candidate's real
+  content — now happens once per country per CV-profile version instead of once per job
+  opening; every tailoring after that reuses the cached base and only does the cheap
+  JD-specific reordering/trimming on top of it. Documented a single-script edit discipline
+  (all XML edits for a run in one Python script, one Bash call, not incremental round
+  trips) and a render-cost-aware visual-QA policy (one mandatory render per document, a
+  second only to confirm an actual fix, never speculative re-renders). Clarified the
+  correct one-shot base64 upload pattern for saving a docx to Drive, since Drive's upload
+  tool has no "upload by path" option and a mishandled retry can be expensive. No cap was
+  added to tailoring volume — kept at the user's explicit request — since these changes
+  target the cost of each tailoring rather than how many happen.
 - **1.4.0** — Consolidated to a single CV template. `Singapore_CV.docx` and `UAE_CV.docx`
   are removed; the former `Australia_CV.docx` is renamed `CV_Template.docx` and used as
   the one starting document for all three countries (country-specific deltas — work-rights
