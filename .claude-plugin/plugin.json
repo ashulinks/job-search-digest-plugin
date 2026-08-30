@@ -1,0 +1,10 @@
+{
+  "name": "job-search-digest",
+  "displayName": "Job Search Digest",
+  "version": "1.4.0",
+  "description": "Recurring, multi-country job search and CV-tailoring pipeline. Searches job boards, dedupes and scores postings against your CV, tailors CVs for strong matches, and can set up its own recurring Cowork schedule inside a Core project. Requires Google Drive connected (and Gmail if you want digests emailed). Ships with one de-identified, fully generic CV template shared across all three countries, safe to redistribute.",
+  "author": {
+    "name": "Ashish Gupta"
+  },
+  "keywords": ["job-search", "career", "cv-tailoring", "recruiting", "automation", "cowork"]
+}
